@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+        }
+
+        .current-weather {
+            margin-bottom: 20px;
+        }
+
+        .forecast-item {
+            display: inline-block;
+            width: 100px;
+            margin-right: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Dashboard</h1>
+        <form id="cityForm">
+            <input type="text" id="cityInput" placeholder="Enter city name">
+            <button type="submit">Get Weather</button>
+        </form>
+        <div id="weatherInfo" class="weather-info">
+            <div id="currentWeather" class="current-weather"></div>
+            <div id="forecast"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('cityForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const city = document.getElementById('cityInput').value;
+            getWeather(city);
+        });
+
+        function getWeather(city) {
+            const apiKey = 'c412bf1a39944ad8bcd163918240404'; 
+            const apiUrl = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=5`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    displayCurrentWeather(data.current);
+                    displayForecast(data.forecast.forecastday);
+                })
+                .catch(error => console.log('Error fetching weather data:', error));
+        }
+
+        function displayCurrentWeather(currentWeather) {
+            const currentWeatherDiv = document.getElementById('currentWeather');
+            currentWeatherDiv.innerHTML = `
+                <h2>Current Weather</h2>
+                <p>Temperature: ${currentWeather.temp_c}°C</p>
+                <p>Condition: ${currentWeather.condition.text}</p>
+                <p>Humidity: ${currentWeather.humidity}%</p>
+                <img src="${currentWeather.condition.icon}" alt="Weather icon">
+            `;
+        }
+
+        function displayForecast(forecast) {
+            const forecastDiv = document.getElementById('forecast');
+            forecastDiv.innerHTML = `<h2>5-Day Forecast</h2>`;
+            
+            forecast.forEach(day => {
+                const forecastItem = document.createElement('div');
+                forecastItem.classList.add('forecast-item');
+                forecastItem.innerHTML = `
+                    <p>${day.date}</p>
+                    <p>Max Temp: ${day.day.maxtemp_c}°C</p>
+                    <p>Min Temp: ${day.day.mintemp_c}°C</p>
+                    <img src="${day.day.condition.icon}" alt="Weather icon">
+                `;
+                forecastDiv.appendChild(forecastItem);
+            });
+        }
+    </script>
+</body>
+</html>
